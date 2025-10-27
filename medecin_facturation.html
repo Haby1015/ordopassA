@@ -1,0 +1,203 @@
+Veux-tu aussi que le numér<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facturation - Médecin | OrdoPass</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Librairies pour PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- ======= Sidebar ======= -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo-clinique.png" alt="" style="width:60px;height:auto;vertical-align:middle;">
+      <span style="margin-left:8px;">ORDOPASS</span>
+    </div>
+    <nav>
+      <a class="nav-link" href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+         <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- ======= Contenu principal ======= -->
+  <main class="main-area">
+    <section class="content">
+
+      <!-- Formulaire Facture -->
+      <div class="invoice-card" id="factureFormCard">
+        <h2>Nouvelle facture</h2>
+        <form id="factureForm">
+
+          <label>Numéro du patient</label>
+          <input type="text" id="patientId" required><br>
+
+          <label>Nom complet du patient</label>
+          <input type="text" id="patient" required><br>
+
+          <label>Âge</label>
+          <input type="number" id="age" required><br>
+
+          <label>Adresse</label>
+          <input type="text" id="adresse" required><br>
+
+          <label>Description</label>
+          <input type="text" id="description" required><br>
+
+          <label>Montant (FCFA)</label>
+          <input type="number" id="montant" required><br>
+
+          <label>Méthode de paiement</label>
+          <select id="paiement">
+            <option>Espèces</option>
+            <option>Carte bancaire</option>
+            <option>Wave</option>
+            <option>Orange Money</option>
+          </select><br>
+
+          <label>Facture payée ?</label>
+          <select id="facturePaye">
+            <option value="Non">Non</option>
+            <option value="Oui">Oui</option>
+          </select><br>
+
+          <label>Type de document</label>
+          <select id="typeFacture">
+            <option value="FACTURE">Facture</option>
+            <option value="FACTURE PROFORMA">Proforma</option>
+          </select><br><br>
+
+          <button type="submit" class="btn-primary">Générer la facture</button>
+        </form>
+      </div>
+
+      <!-- Aperçu Facture -->
+      <div id="facturePreview" class="invoice-card" style="display:none;">
+        <div id="factureContent">
+          <header class="header">
+            <div class="logo-zone">
+              <img src="logo-clinique.png" alt="Logo Clinique Haby Konte" class="logo" style="width:80px;">
+            </div>
+            <div class="clinic-info">
+              <h3>CLINIQUE HABY KONTE</h3>
+              <small>www.clinique-habykonte.com</small>
+            </div>
+          </header>
+
+          <h2 class="title">FACTURE</h2>
+          <p><b>N° Patient :</b> <span id="factureId"></span></p>
+          <p><b>Date :</b> <span id="factureDate"></span></p>
+          <hr>
+
+          <p><b>Patient :</b> <span id="facturePatient"></span></p>
+          <p><b>Âge :</b> <span id="factureAge"></span> ans</p>
+          <p><b>Adresse :</b> <span id="factureAdresse"></span></p>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Désignation</th>
+                <th>Qté</th>
+                <th>PU (FCFA)</th>
+                <th>Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="factureDescription"></td>
+                <td>1</td>
+                <td id="prixRow"></td>
+                <td id="totalRow"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="total-zone">
+            <p><b>TOTAL GÉNÉRAL :</b> <span id="factureMontant"></span> FCFA</p>
+            <p><b>Méthode de paiement :</b> <span id="facturePaiement"></span></p>
+            <p><b>Facture payée :</b> <span id="facturePayeValue"></span></p>
+          </div>
+        </div>
+
+        <!-- Boutons hors PDF -->
+        <div class="actions">
+          <button id="downloadPDF" class="btn-primary">Télécharger en PDF</button>
+          <button id="newFacture" class="btn-primary">Nouvelle facture</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    const form = document.getElementById("factureForm");
+    const preview = document.getElementById("facturePreview");
+    const factureId = document.getElementById("factureId");
+    const factureDate = document.getElementById("factureDate");
+    const typeFacture = document.getElementById("typeFacture");
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+
+      // ✅ Numéro saisi par l’utilisateur
+      factureId.textContent = document.getElementById("patientId").value;
+      factureDate.textContent = new Date().toLocaleDateString();
+
+      document.querySelector(".title").textContent = typeFacture.value;
+
+      document.getElementById("facturePatient").textContent = document.getElementById("patient").value;
+      document.getElementById("factureAge").textContent = document.getElementById("age").value;
+      document.getElementById("factureAdresse").textContent = document.getElementById("adresse").value;
+      document.getElementById("factureDescription").textContent = document.getElementById("description").value;
+
+      let montant = document.getElementById("montant").value;
+      document.getElementById("prixRow").textContent = montant;
+      document.getElementById("totalRow").textContent = montant;
+      document.getElementById("factureMontant").textContent = montant;
+
+      document.getElementById("facturePaiement").textContent = document.getElementById("paiement").value;
+      document.getElementById("facturePayeValue").textContent = document.getElementById("facturePaye").value;
+
+      preview.style.display = "block";
+      document.getElementById("factureFormCard").style.display = "none";
+    });
+
+    document.getElementById("newFacture").addEventListener("click", ()=>{
+      preview.style.display = "none";
+      document.getElementById("factureFormCard").style.display = "block";
+      form.reset();
+    });
+
+    document.getElementById("downloadPDF").addEventListener("click", ()=>{
+      const factureContent = document.getElementById("factureContent");
+      html2canvas(factureContent).then(canvas=>{
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 190;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let position = 10;
+
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+        pdf.save(typeFacture.value.replace(" ", "_").toLowerCase() + ".pdf");
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion Médecin — OrdoPass</title>
+  <link rel="stylesheet" href="style2.css" />
+  <style>
+    /* Petit menu sous le logo */
+    .logo-center {
+      text-align: center;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .logo-dropdown {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 8px 0;
+      min-width: 180px;
+      z-index: 10;
+      text-align: left;
+    }
+
+    .logo-dropdown a {
+      display: block;
+      padding: 8px 16px;
+      color: #1e3c72;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .logo-dropdown a:hover {
+      background-color: #f3f4f6;
+    }
+
+    .logo-center:hover .logo-dropdown {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="split-layout">
+    <!-- 🩺 Image à gauche -->
+    <div class="side-image" style="background-image:url('images/medecin-bg.jpg');">
+      <div class="side-overlay"></div>
+      <div class="side-content">
+        <h2>Bienvenue Docteur</h2>
+        <p>Accédez à vos consultations et gérez vos ordonnances sécurisées.</p>
+      </div>
+    </div>
+
+    <!-- 🧾 Formulaire -->
+    <div class="form-side">
+      <div class="form-card">
+        <div class="logo-center">
+          <!-- Logo OrdoPass -->
+          <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer;">
+            <linearGradient id="g3" x1="0" x2="1">
+              <stop offset="0" stop-color="#2a5298"/>
+              <stop offset="1" stop-color="#1e3c72"/>
+            </linearGradient>
+            <text x="0" y="28" font-family="Inter, Arial" font-size="22" font-weight="700" fill="url(#g3)">
+              Ordo<tspan fill="#0ea5a0">Pass</tspan>
+            </text>
+          </svg>
+
+          <!-- 🔽 Menu déroulant sous le logo -->
+          <div class="logo-dropdown">
+            <a href="index.html">🔐 Page de connexion</a>
+            <a href="register.html">📝 Créer un compte</a>
+          </div>
+        </div>
+
+        <form id="loginForm" class="flex-col">
+          <div class="form-group">
+            <label>Identifiant</label>
+            <input id="username" class="input" type="text" placeholder="Nom d'utilisateur" required>
+          </div>
+
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input id="password" class="input" type="password" placeholder="Mot de passe" required>
+          </div>
+
+          <input id="role" type="hidden" value="medecin">
+
+          <button class="btn-primary" type="submit">Se connecter</button>
+
+          <p class="small-link">Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
+          <div id="messageBox" class="message-box"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="js/auth.js"></script>
+</body>
+</html>

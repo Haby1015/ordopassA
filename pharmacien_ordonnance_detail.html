@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détail Ordonnance - OrdoPass</title>
+  <link rel="stylesheet" href="style1.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2, h3 { margin-top: 0; color: #2a5298; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+    .btn-primary { background: #2a5298; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-outline { border: 1px solid #2a5298; padding: 8px 16px; border-radius: 6px; background: white; color: #2a5298; cursor: pointer; }
+    .status { padding: 5px 10px; border-radius: 6px; font-size: 14px; }
+    .status.pending { background: #ffc107; color: #fff; }
+    .status.progress { background: #17a2b8; color: #fff; }
+    .status.done { background: #28a745; color: #fff; }
+    .status.cancelled { background: #dc3545; color: #fff; }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- Sidebar -->
+   <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-house-medical"></i> <span>Tableau de bord</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="pharmacien_parametres.html" class="active"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+    </nav>
+    <div id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-file-medical"></i> Détail de l’ordonnance</h1>
+    </header>
+
+    <section class="content">
+      <!-- Patient + Médecin -->
+      <div class="grid">
+        <div class="card">
+          <h3>Informations Patient</h3>
+          <p><b>Nom :</b> Awa Diop</p>
+          <p><b>Date de naissance :</b> 15/03/1992</p>
+          <p><b>Sexe :</b> Féminin</p>
+          <p><b>Date consultation :</b> 13 Juil 2025 - 08h45</p>
+          <p><b>Statut :</b> <span id="status" class="status pending">À traiter</span></p>
+        </div>
+
+        <div class="card">
+          <h3>Informations Médecin</h3>
+          <p><b>Nom :</b> Dr Fatoumata Ndiaye</p>
+          <p><b>Spécialité :</b> Médecine Générale</p>
+          <p><b>Identifiant :</b> MED-2025-00231</p>
+          <p><b>Cabinet :</b> Centre Médical Médina, Dakar</p>
+          <p><b>Téléphone :</b> +221 77 123 45 67</p>
+          <p><b>Email :</b> f.ndiaye@ordopass.sn</p>
+        </div>
+      </div>
+
+      <!-- Prescription -->
+      <div class="card">
+        <h3>Prescription</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Médicament</th>
+              <th>Forme</th>
+              <th>Posologie</th>
+              <th>Durée</th>
+              <th>Quantité</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Doliprane 1000mg</td>
+              <td>Comprimé</td>
+              <td>1 matin et soir</td>
+              <td>3 jours</td>
+              <td>6</td>
+            </tr>
+            <tr>
+              <td>Vitamine C 500mg</td>
+              <td>Comprimé</td>
+              <td>1 par jour</td>
+              <td>7 jours</td>
+              <td>7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Instructions -->
+      <div class="card">
+        <h3>Instructions du médecin</h3>
+        <p>Boire beaucoup d’eau, repos, consulter si la fièvre persiste après 3 jours.</p>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
+        <!-- Bouton retour -->
+        <button id="backBtn" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> Retour au dashboard</button>
+
+        <!-- Validation / Rejet -->
+        <div>
+          <button id="rejectBtn" class="btn-outline">Rejeter l’ordonnance</button>
+          <button id="validateBtn" class="btn-primary">Valider l’ordonnance</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const validateBtn = document.getElementById("validateBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+    const backBtn = document.getElementById("backBtn");
+
+    // Récupération de l’ID ordonnance via l’URL
+    const params = new URLSearchParams(window.location.search);
+    const ordonnanceId = params.get("ticket") || "1456";
+
+    // Sauvegarde statut dans localStorage
+    function saveStatus(newStatus) {
+      let data = JSON.parse(localStorage.getItem("ordonnances")) || {};
+      data[ordonnanceId] = newStatus;
+      localStorage.setItem("ordonnances", JSON.stringify(data));
+    }
+
+    validateBtn.addEventListener("click", () => {
+      if (statusEl.classList.contains("pending")) {
+        statusEl.textContent = "En cours";
+        statusEl.className = "status progress";
+        saveStatus("progress");
+      } else if (statusEl.classList.contains("progress")) {
+        statusEl.textContent = "Terminé";
+        statusEl.className = "status done";
+        saveStatus("done");
+      } else {
+        alert("L’ordonnance est déjà terminée.");
+      }
+    });
+
+    rejectBtn.addEventListener("click", () => {
+      statusEl.textContent = "Annulée";
+      statusEl.className = "status cancelled";
+      saveStatus("cancelled");
+    });
+
+    // Bouton retour vers dashboard
+    backBtn.addEventListener("click", () => {
+      window.location.href = "pharmacien_dashboard.html";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion — OrdoPass</title>
+  <link rel="stylesheet" href="style2.css" />
+  <style>
+    /* 🔹 Style des boutons de rôle */
+    .role-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 28px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .btn-role {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f3f4f6;
+      color: #111827;
+      padding: 16px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .btn-role .col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .btn-role .title {
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    .btn-role .subtitle {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .btn-role .emoji {
+      font-size: 24px;
+      margin-left: 12px;
+    }
+
+    /* 🩺 Couleur Médecin */
+    .btn-role.medecin {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+    }
+
+    .btn-role.medecin:hover {
+      background: linear-gradient(135deg, #2a5298, #3b82f6);
+      transform: translateY(-2px);
+    }
+
+    /* 💊 Couleur Pharmacien */
+    .btn-role.pharmacie {
+      background: linear-gradient(135deg, #0ea5a0, #10b981);
+      color: white;
+    }
+
+    .btn-role.pharmacie:hover {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      transform: translateY(-2px);
+    }
+
+    /* 🌄 Image d’accueil */
+    .hero-right {
+      position: relative;
+      flex: 1;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body>
+  <main class="hero">
+    <!-- 🔹 Partie gauche -->
+    <div class="hero-left">
+      <!-- Logo OrdoPass -->
+      <a href="/" class="logo" style="text-decoration:none">
+        <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#2a5298"/>
+              <stop offset="1" stop-color="#1e3c72"/>
+            </linearGradient>
+          </defs>
+          <text x="0" y="28" font-family="Inter, Arial" font-size="28" font-weight="700" fill="url(#g)">
+            Ordo<tspan fill="#0ea5a0">Pass</tspan>
+          </text>
+        </svg>
+      </a>
+
+      <h1>Bienvenue sur OrdoPass</h1>
+      <p>Plateforme sécurisée pour prescrire, partager et délivrer des ordonnances. Choisissez votre rôle pour vous connecter.</p>
+
+      <!-- 🔘 Boutons de rôle -->
+      <div class="role-buttons">
+        <a class="btn-role medecin" href="medecin_login.html">
+          <div class="col">
+            <div class="title">Connexion Médecin</div>
+            <div class="subtitle">Accéder à votre tableau de bord</div>
+          </div>
+          <div class="emoji">👨‍⚕️</div>
+        </a>
+
+        <a class="btn-role pharmacie" href="pharmacien_login.html">
+          <div class="col">
+            <div class="title">Connexion Pharmacien</div>
+            <div class="subtitle">Accéder à votre espace pharmacie</div>
+          </div>
+          <div class="emoji">💊</div>
+        </a>
+      </div>
+
+      <!-- 🔗 Lien inscription -->
+      <p style="margin-top:18px;color:var(--muted);">
+        Pas encore de compte ? <a href="register.html">Créer un compte</a>
+      </p>
+    </div>
+
+    <!-- 🌆 Partie droite : image d’accueil -->
+    <div class="hero-right" style="background-image:url('images/accueil-bg.png');">
+      <div class="overlay"></div>
+    </div>
+  </main>
+</body>
+</html>

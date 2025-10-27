@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patients - OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f5f5f5; }
+    .sidebar { width:230px; float:left; height:100vh; background:#2a5298; color:white; padding:15px; box-sizing:border-box; }
+    .sidebar a { display:block; padding:10px; color:white; text-decoration:none; margin-bottom:5px; border-radius:5px; }
+    .sidebar a.active, .sidebar a:hover { background:#1e3c72; }
+    .main-area { margin-left:230px; padding:20px; }
+    h1 { margin-bottom:20px; }
+    table { width:100%; border-collapse: collapse; background:#fff; border-radius:8px; overflow:hidden; }
+    th, td { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
+    th { background:#2a5298; color:#fff; }
+    tr:hover { background:#f1f1f1; }
+    button { padding:6px 12px; margin:2px; border:none; border-radius:5px; cursor:pointer; }
+    .btn-primary { background:#2a5298; color:white; }
+    .btn-outline { background:#fff; color:#2a5298; border:1px solid #2a5298; }
+    .btn-view { background:#28a745; color:white; }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; }
+    .modal-content { background:#fff; padding:20px; border-radius:8px; width:320px; box-sizing:border-box; }
+    .modal-content input { width:100%; padding:8px; margin-bottom:10px; box-sizing:border-box; }
+    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav>
+      <a class="nav-link" href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <header>
+      <h1>Liste des patients</h1>
+      <button class="btn-primary" onclick="showAddForm()"><i class="fa-solid fa-plus"></i> Nouveau patient</button>
+    </header>
+
+    <table id="patientsTable">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Nom</th>
+          <th>Âge</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Date ajout</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <!-- Modal formulaire -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Ajouter patient</h2>
+      <input type="text" id="name" placeholder="Nom" required>
+      <input type="number" id="age" placeholder="Âge" required>
+      <input type="text" id="phone" placeholder="Téléphone">
+      <input type="text" id="address" placeholder="Adresse">
+      <input type="text" id="image" placeholder="URL de l'image">
+      <button id="saveBtn" class="btn-primary">Enregistrer</button>
+      <button onclick="closeForm()" class="btn-outline">Annuler</button>
+    </div>
+  </div>
+
+  <script>
+    // Vérification de session
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+    if(!user || user.role !== "medecin") {
+      window.location.href = "login.html";
+    }
+
+    // Gestion des patients persistée
+    let patients = JSON.parse(localStorage.getItem("patients")) || [
+      {id:1, name:"Awa Diop", age:32, phone:"+221771234567", address:"Dakar", image:"https://i.pravatar.cc/40?u=awa", added:"13/07/2025"},
+      {id:2, name:"Leslie Alexander", age:28, phone:"+221779876543", address:"Thiès", image:"https://i.pravatar.cc/40?u=leslie", added:"13/07/2025"},
+      {id:3, name:"Ralph Edwards", age:27, phone:"+221762345678", address:"Saint-Louis", image:"https://i.pravatar.cc/40?u=ralph", added:"13/07/2025"}
+    ];
+
+    let editId = null;
+
+    function renderPatients(){
+      const tbody = document.querySelector("#patientsTable tbody");
+      if (!tbody) {
+        console.error("Table body not found!");
+        return;
+      }
+      
+      tbody.innerHTML = "";
+      
+      if (patients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Aucun patient trouvé</td></tr>`;
+        return;
+      }
+      
+      patients.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><img src="${p.image||'https://i.pravatar.cc/40'}" alt="${p.name}" class="avatar"></td>
+          <td>${p.name}</td>
+          <td>${p.age} ans</td>
+          <td>${p.phone}</td>
+          <td>${p.address}</td>
+          <td>${p.added}</td>
+          <td>
+            <button class="btn-view" onclick="viewPatient(${p.id})"><i class="fa-solid fa-eye"></i> Voir</button>
+            <button class="btn-outline" onclick="editPatient(${p.id})"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn-outline" onclick="deletePatient(${p.id})"><i class="fa-solid fa-trash"></i></button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem("patients", JSON.stringify(patients));
+    }
+
+    // Fonction pour voir le profil patient
+    function viewPatient(id) {
+      const patient = patients.find(p => p.id === id);
+      if (patient) {
+        // Stocker les données du patient pour la page de profil
+        localStorage.setItem('currentPatient', JSON.stringify(patient));
+        // Rediriger vers la page de profil patient
+        window.location.href = 'patient_profile.html';
+      }
+    }
+
+    function showAddForm(){
+      editId = null;
+      document.getElementById("modalTitle").innerText = "Ajouter patient";
+      document.getElementById("name").value = "";
+      document.getElementById("age").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("address").value = "";
+      document.getElementById("image").value = "";
+      document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeForm(){ 
+      document.getElementById("modal").style.display = "none"; 
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const name = document.getElementById("name").value.trim();
+      const age = parseInt(document.getElementById("age").value);
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const image = document.getElementById("image").value.trim() || "https://i.pravatar.cc/40";
+
+      if(!name || !age) {
+        alert("Nom et âge obligatoires");
+        return;
+      }
+
+      if(editId){
+        // Modification
+        const p = patients.find(p => p.id === editId);
+        if (p) {
+          p.name = name; 
+          p.age = age; 
+          p.phone = phone; 
+          p.address = address; 
+          p.image = image;
+        }
+      } else {
+        // Ajout
+        const newId = patients.length ? Math.max(...patients.map(p => p.id)) + 1 : 1;
+        patients.push({
+          id: newId, 
+          name, 
+          age, 
+          phone, 
+          address, 
+          image, 
+          added: new Date().toLocaleDateString("fr-FR")
+        });
+      }
+
+      renderPatients();
+      closeForm();
+    });
+
+    function editPatient(id){
+      editId = id;
+      const p = patients.find(p => p.id === id);
+      if (p) {
+        document.getElementById("modalTitle").innerText = "Modifier patient";
+        document.getElementById("name").value = p.name;
+        document.getElementById("age").value = p.age;
+        document.getElementById("phone").value = p.phone || "";
+        document.getElementById("address").value = p.address || "";
+        document.getElementById("image").value = p.image || "";
+        document.getElementById("modal").style.display = "flex";
+      }
+    }
+
+    function deletePatient(id){
+      if(confirm("Voulez-vous vraiment supprimer ce patient ?")){
+        patients = patients.filter(p => p.id !== id);
+        renderPatients();
+      }
+    }
+
+    // Déconnexion
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    });
+
+    // Affichage initial des patients
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Page chargée, patients:", patients);
+      renderPatients();
+    });
+  </script>
+
+</body>
+</html>

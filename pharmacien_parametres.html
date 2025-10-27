@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres - Pharmacien | OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      display: flex;
+    }
+
+    .sidebar {
+      background: #1e3c72;
+      color: white;
+      width: 250px;
+      height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar .logo {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
+
+    .sidebar .logo span {
+      color: #0ea5a0;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      background: rgba(255,255,255,0.1);
+      padding-left: 10px;
+    }
+
+    .main-area {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .topbar {
+      background: white;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .content .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-primary {
+      background: #1e3c72;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #2a5298;
+    }
+
+    #logout {
+      margin-top: auto;
+      background: #e74c3c;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #logout:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-house-medical"></i> <span>Tableau de bord</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="pharmacien_parametres.html" class="active"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+    </nav>
+    <div id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-gear"></i> Paramètres du compte</h1>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <h2>Mon profil</h2>
+        <form>
+          <div class="form-group">
+            <label>Nom de la pharmacie</label>
+            <input type="text" value="Pharmacie Centrale Liberté 6">
+          </div>
+          <div class="form-group">
+            <label>Identifiant pharmacien</label>
+            <input type="text" value="PHARM-SEN-0123" readonly>
+          </div>
+          <div class="form-group">
+            <label>Responsable</label>
+            <input type="text" value="M. Abdoulaye Seck">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" value="contact@pharmacie-liberte6.sn">
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input type="text" value="+221 77 456 78 90">
+          </div>
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" value="Liberté 6, Dakar">
+          </div>
+          <button type="submit" class="btn-primary">Modifier mes informations</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ✅ Vérifie si l’utilisateur est connecté
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+
+    // ✅ Déconnexion
+    document.getElementById('logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Souhaitez-vous vraiment vous déconnecter ?')) {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

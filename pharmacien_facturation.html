@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facturation - Pharmacien | OrdoPass</title>
+
+  <!-- FontAwesome + Styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Librairies PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f6fa;
+    }
+    .dashboard-page {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background: #2a5298;
+      color: white;
+      padding-top: 20px;
+      position: fixed;
+      height: 100vh;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo span {
+      color: #4CAF50;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    nav a:hover,
+    nav a.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left-color: #4CAF50;
+    }
+    nav a i { width: 20px; text-align: center; }
+    .main-area {
+      margin-left: 250px;
+      padding: 20px;
+      flex: 1;
+    }
+    .topbar {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .invoice-card, .invoice-preview {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 { color: #2a5298; }
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-primary { background: #2a5298; color: white; }
+    .btn-primary:hover { background: #1e3c72; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-outline {
+      border: 1px solid #999; background: transparent; color: #555;
+    }
+    .btn-outline:hover { background: #999; color: white; }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .item-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .item-row input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .invoice-table th, .invoice-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    .invoice-table th {
+      background: #2a5298;
+      color: white;
+    }
+    .total-section {
+      text-align: right;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-house-medical"></i> <span>Tableau de bord</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="pharmacien_parametres.html" class="active"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+    </nav>
+    <div id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</div>
+  </aside>
+
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-file-invoice-dollar"></i> Gestion des Factures</h1>
+    </header>
+
+    <section class="invoice-card" id="invoiceFormSection">
+      <h2>Nouvelle Facture</h2>
+      <form id="invoiceForm">
+        <label>Numéro de facture</label>
+        <input id="invoiceNumber" class="form-control" readonly>
+
+        <label>Nom du patient</label>
+        <input id="patientName" class="form-control" placeholder="Nom complet du patient" required>
+
+        <label>Méthode de paiement</label>
+        <select id="paymentMethod" class="form-control">
+          <option>Espèces</option>
+          <option>Carte bancaire</option>
+          <option>Wave</option>
+          <option>Orange Money</option>
+          <option>Virement bancaire</option>
+        </select>
+
+        <div class="items-list">
+          <h3>Articles / Médicaments</h3>
+          <div id="itemsContainer"></div>
+          <button type="button" class="btn btn-success" onclick="addItem()">+ Ajouter un article</button>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Générer la facture</button>
+          <button type="button" class="btn btn-outline" onclick="clearForm()">Effacer</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="invoice-preview" id="invoicePreview" style="display:none;">
+      <div id="invoiceContent">
+        <h2 id="previewTitle">FACTURE</h2>
+        <p><strong>Numéro:</strong> <span id="previewNumber"></span></p>
+        <p><strong>Date:</strong> <span id="previewDate"></span></p>
+        <p><strong>Patient:</strong> <span id="previewPatient"></span></p>
+        <p><strong>Paiement:</strong> <span id="previewPayment"></span></p>
+        
+        <table class="invoice-table">
+          <thead>
+            <tr><th>Description</th><th>Qté</th><th>Prix Unitaire</th><th>Montant</th></tr>
+          </thead>
+          <tbody id="previewItems"></tbody>
+        </table>
+
+        <div class="total-section">
+          <p>Sous-total : <span id="previewSubtotal">0</span> FCFA</p>
+          <p>TVA (18%) : <span id="previewTVA">0</span> FCFA</p>
+          <h3>Total : <span id="previewTotal">0</span> FCFA</h3>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="downloadPDF" class="btn btn-primary">Télécharger PDF</button>
+        <button id="printInvoice" class="btn btn-success">Imprimer</button>
+        <button id="newInvoice" class="btn btn-outline">Nouvelle facture</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+    let invoiceCounter = parseInt(localStorage.getItem('invoiceCounter')) || 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      generateInvoiceNumber();
+      addItem();
+
+      document.getElementById('invoiceForm').addEventListener('submit', generateInvoice);
+      document.getElementById('logout').addEventListener('click', logout);
+      document.getElementById('downloadPDF').addEventListener('click', downloadPDF);
+      document.getElementById('printInvoice').addEventListener('click', () => window.print());
+      document.getElementById('newInvoice').addEventListener('click', () => {
+        document.getElementById('invoicePreview').style.display = 'none';
+        document.getElementById('invoiceFormSection').style.display = 'block';
+        clearForm();
+      });
+    });
+
+    function logout(e) {
+      e.preventDefault();
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    }
+
+    function generateInvoiceNumber() {
+      const now = new Date();
+      const code = `FACT-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}-${String(invoiceCounter).padStart(4,'0')}`;
+      document.getElementById('invoiceNumber').value = code;
+    }
+
+    function addItem() {
+      const id = Date.now();
+      const container = document.getElementById('itemsContainer');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="item-row" id="item-${id}">
+          <input placeholder="Description" class="desc">
+          <input type="number" min="1" value="1" class="qty" onchange="calcTotals()">
+          <input type="number" placeholder="Prix" class="price" onchange="calcTotals()">
+          <input type="text" readonly class="amount" placeholder="0 FCFA">
+          <button type="button" onclick="removeItem('${id}')">❌</button>
+        </div>
+      `);
+    }
+
+    function removeItem(id) {
+      document.getElementById(`item-${id}`).remove();
+      calcTotals();
+    }
+
+    function calcTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('.item-row').forEach(row => {
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const price = parseFloat(row.querySelector('.price').value) || 0;
+        const amount = qty * price;
+        row.querySelector('.amount').value = `${amount.toLocaleString('fr-FR')} FCFA`;
+        subtotal += amount;
+      });
+      return subtotal;
+    }
+
+    function generateInvoice(e) {
+      e.preventDefault();
+      const subtotal = calcTotals();
+      const tva = subtotal * 0.18;
+      const total = subtotal + tva;
+
+      document.getElementById('previewTitle').textContent = "FACTURE";
+      document.getElementById('previewNumber').textContent = document.getElementById('invoiceNumber').value;
+      document.getElementById('previewDate').textContent = new Date().toLocaleDateString('fr-FR');
+      document.getElementById('previewPatient').textContent = document.getElementById('patientName').value;
+      document.getElementById('previewPayment').textContent = document.getElementById('paymentMethod').value;
+
+      const tbody = document.getElementById('previewItems');
+      tbody.innerHTML = '';
+      document.querySelectorAll('.item-row').forEach(row => {
+        const desc = row.querySelector('.desc').value;
+        const qty = row.querySelector('.qty').value;
+        const price = row.querySelector('.price').value;
+        if (desc && price) {
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr><td>${desc}</td><td>${qty}</td><td>${price} FCFA</td><td>${(qty*price).toLocaleString('fr-FR')} FCFA</td></tr>
+          `);
+        }
+      });
+
+      document.getElementById('previewSubtotal').textContent = subtotal.toLocaleString('fr-FR');
+      document.getElementById('previewTVA').textContent = tva.toLocaleString('fr-FR');
+      document.getElementById('previewTotal').textContent = total.toLocaleString('fr-FR');
+
+      document.getElementById('invoiceFormSection').style.display = 'none';
+      document.getElementById('invoicePreview').style.display = 'block';
+
+      invoiceCounter++;
+      localStorage.setItem('invoiceCounter', invoiceCounter);
+    }
+
+    function downloadPDF() {
+      const invoiceContent = document.getElementById('invoiceContent');
+      html2canvas(invoiceContent, { scale: 2 }).then(canvas => {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png');
+        const width = 190;
+        const height = (canvas.height * width) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, width, height);
+        pdf.save(`${document.getElementById('invoiceNumber').value}.pdf`);
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('invoiceForm').reset();
+      document.getElementById('itemsContainer').innerHTML = '';
+      addItem();
+      generateInvoiceNumber();
+    }
+  </script>
+</body>
+</html>

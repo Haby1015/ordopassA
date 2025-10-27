@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pharmacien - Ordonnances reçues</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2d9d5a64b.js" crossorigin="anonymous"></script>
+
+  <style>
+    /* 🔹 Style du bouton de déconnexion */
+    #logout {
+      display: flex !important;
+      align-items: center;
+      color: white !important;
+      background: #e74c3c;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      transition: 0.3s ease;
+    }
+    #logout:hover {
+      background: #c0392b;
+    }
+
+    /* ✅ Ajustement visuel pour le contenu */
+    .table-wrap {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ✅ Barre latérale -->
+    <aside class="sidebar">
+      <div class="logo">ORDO<span>PASS</span></div>
+      <nav class="menu">
+        <a href="#" class="active"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+        <a href="#"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+        <a href="pharmacien_stock.html">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span>
+        </a>
+        <a href="pharmacien_facturation.html">
+          <i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span>
+        </a>
+        <a href="pharmacien_messagerie.html">
+          <i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span>
+        </a>
+        <a href="pharmacien_parametres.html">
+          <i class="fa-solid fa-gear"></i> <span>Paramètres</span>
+        </a>
+        <a href="#" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Déconnexion</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ✅ Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Ordonnances reçues</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=12" alt="avatar"/>
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <div style="font-weight:700;color:#234a6a">Ordonnances reçues</div>
+            <div style="color:#6b7f8e;font-size:14px">Affichage des ordonnances récentes</div>
+          </div>
+          <div>
+            <input id="searchInput" placeholder="Rechercher patient / n° ticket..." 
+              style="padding:8px 12px;border-radius:8px;border:1px solid #e6eef6" />
+            <button class="btn primary" id="refreshBtn">Actualiser</button>
+          </div>
+        </div>
+
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-filter="all">Tout</div>
+          <div class="tab" data-filter="active">À traiter</div>
+          <div class="tab" data-filter="en_cours">En cours</div>
+          <div class="tab" data-filter="terminee">Terminées</div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="ordTable">
+            <thead>
+              <tr>
+                <th>N° ticket</th>
+                <th>Date / Heure</th>
+                <th>Patient</th>
+                <th>Médecin</th>
+                <th>Statut</th>
+                <th style="width:120px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordBody">
+              <tr>
+                <td>1458</td>
+                <td>04/08/2025 - 09h30</td>
+                <td>Awa Diop</td>
+                <td>Dr Fatoumata Ndiaye</td>
+                <td><span class="status active">À traiter</span></td>
+                <td><button class="btn voir" onclick="voirOrdonnance(1458)">Voir</button></td>
+              </tr>
+              <tr>
+                <td>1459</td>
+                <td>05/08/2025 - 11h00</td>
+                <td>Mamadou Fall</td>
+                <td>Dr Abdou Mbaye</td>
+                <td><span class="status en_cours">En cours</span></td>
+                <td><button class="btn voir" onclick="voirOrdonnance(1459)">Voir</button></td>
+              </tr>
+              <tr>
+                <td>1460</td>
+                <td>06/08/2025 - 15h45</td>
+                <td>Astou Kane</td>
+                <td>Dr Khady Seck</td>
+                <td><span class="status terminee">Terminée</span></td>
+                <td><button class="btn voir" onclick="voirOrdonnance(1460)">Voir</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ✅ Redirection vers la page de détails d’une ordonnance
+    function voirOrdonnance(id) {
+      window.location.href = `details_ordonnance.html?id=${id}`;
+    }
+
+    // ✅ Rafraîchir la page
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      location.reload();
+    });
+
+    // ✅ Déconnexion : retour à la page d’accueil (index.html)
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
+      window.location.href = "index.html"; // 🔁 Correction ici
+    });
+  </script>
+</body>
+</html>

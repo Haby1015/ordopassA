@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharmacies - Médecin | OrdoPass</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Styles spécifiques pour la page pharmacies */
+    .pharmacy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .pharmacy-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1px solid #e1e5e9;
+      overflow: hidden;
+    }
+
+    .pharmacy-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .pharmacy-card .card-body {
+      padding: 20px;
+    }
+
+    .pharmacy-card img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pharmacy-card h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .pharmacy-card p {
+      color: #5a6c7d;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pharmacy-card .card-actions {
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-outline {
+      padding: 8px 16px;
+      border: 2px solid #3498db;
+      color: #3498db;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9em;
+      transition: all 0.3s ease;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn-outline:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-primary {
+      padding: 8px 16px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn-primary:hover {
+      background: #2980b9;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      flex: 1;
+      min-width: 300px;
+      padding: 12px 20px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+
+    .filter-select {
+      padding: 12px 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1em;
+      background: white;
+      min-width: 200px;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+
+    .stat-card .number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #3498db;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .status-open {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-closed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-24h {
+      background: #cce7ff;
+      color: #004085;
+    }
+
+    .pharmacy-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #6c757d;
+    }
+
+    .service-tag {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin: 2px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .pharmacy-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .search-container {
+        flex-direction: column;
+      }
+      
+      .search-bar, .filter-select {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDO<span>PASS</span></div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html" class="active"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+      <a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Contenu principal -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies Partenaires</h1>
+      <div class="user-info">
+        <span>Dr. Diallo</span>
+        <i class="fa-solid fa-user-md"></i>
+      </div>
+    </header>
+
+    <section class="content">
+      <!-- Cartes de statistiques -->
+      <div class="stats-cards">
+        <div class="stat-card">
+          <h3>Pharmacies Total</h3>
+          <div class="number" id="totalPharmacies">8</div>
+        </div>
+        <div class="stat-card">
+          <h3>Ouvertes Maintenant</h3>
+          <div class="number" id="openNow">6</div>
+        </div>
+        <div class="stat-card">
+          <h3>24h/24</h3>
+          <div class="number" id="open24h">1</div>
+        </div>
+        <div class="stat-card">
+          <h3>Avec Livraison</h3>
+          <div class="number" id="withDelivery">7</div>
+        </div>
+      </div>
+
+      <!-- Barre de recherche et filtres -->
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher une pharmacie..." class="search-bar">
+        <select id="zoneFilter" class="filter-select">
+          <option value="">Toutes les zones</option>
+          <option value="Liberté">Liberté</option>
+          <option value="Mamelles">Mamelles</option>
+          <option value="Fann">Fann</option>
+          <option value="Ngor">Ngor</option>
+          <option value="Colobane">Colobane</option>
+          <option value="Almadies">Almadies</option>
+        </select>
+        <select id="serviceFilter" class="filter-select">
+          <option value="">Tous les services</option>
+          <option value="livraison">Avec livraison</option>
+          <option value="24h">Ouvert 24h/24</option>
+          <option value="mobile">Paiement mobile</option>
+        </select>
+      </div>
+
+      <!-- Grille des pharmacies -->
+      <div class="pharmacy-grid" id="pharmacyGrid">
+        <!-- Les pharmacies seront chargées dynamiquement -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de détails -->
+  <div class="pharmacy-modal" id="pharmacyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Détails de la pharmacie</h2>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      <div id="modalContent">
+        <!-- Contenu chargé dynamiquement -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Données des pharmacies
+    const pharmacies = [
+      {
+        id: 1,
+        name: "Pharmacie Centrale Liberté 6",
+        address: "Liberté 6, Dakar",
+        phone: "+221 33 123 45 67",
+        hours: "Lun-Dim | 08h-22h",
+        services: ["livraison", "mobile"],
+        zone: "Liberté",
+        image: "https://static.thenounproject.com/png/157019-200.png",
+        status: "open",
+        description: "Pharmacie de référence dans le quartier Liberté 6, offrant un service complet et une large gamme de médicaments.",
+        coordinates: { lat: 14.6937, lng: -17.4441 }
+      },
+      {
+        id: 2,
+        name: "Pharmacie des Mamelles",
+        address: "Mamelles, Dakar",
+        phone: "+221 77 456 78 90",
+        hours: "Lun-Sam | 09h-21h",
+        services: ["livraison"],
+        zone: "Mamelles",
+        image: "https://static.thenounproject.com/png/977654-200.png",
+        status: "open",
+        description: "Située au cœur des Mamelles, cette pharmacie propose des services de qualité avec livraison à domicile.",
+        coordinates: { lat: 14.7167, lng: -17.4667 }
+      },
+      {
+        id: 3,
+        name: "Pharmacie Fann Résidence",
+        address: "Fann Résidence, Dakar",
+        phone: "+221 70 123 45 67",
+        hours: "24h/24",
+        services: ["24h", "mobile"],
+        zone: "Fann",
+        image: "https://static.thenounproject.com/png/94834-200.png",
+        status: "open",
+        description: "Pharmacie ouverte 24h/24 pour répondre à vos besoins urgents à toute heure.",
+        coordinates: { lat: 14.6833, lng: -17.4500 }
+      },
+      {
+        id: 4,
+        name: "Pharmacie Liberté 5",
+        address: "Liberté 5, Dakar",
+        phone: "+221 33 654 32 10",
+        hours: "Lun-Dim | 07h-23h",
+        services: ["livraison", "mobile"],
+        zone: "Liberté",
+        image: "https://static.thenounproject.com/png/287531-200.png",
+        status: "open",
+        description: "Service étendu jusqu'à 23h avec possibilité de livraison et paiement mobile.",
+        coordinates: { lat: 14.6912, lng: -17.4456 }
+      },
+      {
+        id: 5,
+        name: "Pharmacie Soleil",
+        address: "Ngor, Dakar",
+        phone: "+221 77 890 12 34",
+        hours: "Lun-Sam | 08h-20h",
+        services: ["livraison"],
+        zone: "Ngor",
+        image: "https://static.thenounproject.com/png/123177-200.png",
+        status: "closed",
+        description: "Pharmacie de quartier offrant un service personnalisé et convivial.",
+        coordinates: { lat: 14.7500, lng: -17.5167 }
+      },
+      {
+        id: 6,
+        name: "Pharmacie Faidherbe",
+        address: "Colobane, Dakar",
+        phone: "+221 33 456 78 90",
+        hours: "Lun-Dim | 08h-22h",
+        services: ["livraison", "mobile"],
+        zone: "Colobane",
+        image: "https://static.thenounproject.com/png/314-200.png",
+        status: "open",
+        description: "Établissement historique offrant des services modernes de livraison et paiement mobile.",
+        coordinates: { lat: 14.6833, lng: -17.4500 }
+      },
+      {
+        id: 7,
+        name: "Pharmacie Liberté 1",
+        address: "Liberté 1, Dakar",
+        phone: "+221 33 222 33 44",
+        hours: "Lun-Dim | 08h-21h",
+        services: ["livraison"],
+        zone: "Liberté",
+        image: "https://static.thenounproject.com/png/7848531-200.png",
+        status: "open",
+        description: "Service de proximité avec livraison rapide dans tout le quartier Liberté.",
+        coordinates: { lat: 14.6895, lng: -17.4478 }
+      },
+      {
+        id: 8,
+        name: "Pharmacie des Almadies",
+        address: "Les Almadies, Dakar",
+        phone: "+221 77 321 54 65",
+        hours: "Lun-Sam | 09h-22h",
+        services: ["livraison", "mobile"],
+        zone: "Almadies",
+        image: "https://static.thenounproject.com/png/659-200.png",
+        status: "closed",
+        description: "Pharmacie moderne des Almadies proposant tous les services digitaux.",
+        coordinates: { lat: 14.7333, lng: -17.5167 }
+      }
+    ];
+
+    // Éléments DOM
+    const pharmacyGrid = document.getElementById('pharmacyGrid');
+    const searchInput = document.getElementById('searchInput');
+    const zoneFilter = document.getElementById('zoneFilter');
+    const serviceFilter = document.getElementById('serviceFilter');
+    const pharmacyModal = document.getElementById('pharmacyModal');
+    const closeModal = document.getElementById('closeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+
+    // Afficher les pharmacies
+    function displayPharmacies(pharmaciesToShow) {
+      pharmacyGrid.innerHTML = '';
+
+      if (pharmaciesToShow.length === 0) {
+        pharmacyGrid.innerHTML = `
+          <div class="no-results">
+            <i class="fa-solid fa-search" style="font-size: 3em; margin-bottom: 15px;"></i>
+            <h3>Aucune pharmacie trouvée</h3>
+            <p>Essayez de modifier vos critères de recherche</p>
+          </div>
+        `;
+        return;
+      }
+
+      pharmaciesToShow.forEach(pharmacy => {
+        const statusClass = pharmacy.status === 'open' ? 'status-open' : 
+                           pharmacy.hours.includes('24h') ? 'status-24h' : 'status-closed';
+        const statusText = pharmacy.status === 'open' ? 'Ouverte' : 
+                          pharmacy.hours.includes('24h') ? '24h/24' : 'Fermée';
+
+        const pharmacyCard = document.createElement('div');
+        pharmacyCard.className = 'pharmacy-card';
+        pharmacyCard.innerHTML = `
+          <div class="card-body">
+            <img src="${pharmacy.image}" alt="${pharmacy.name}">
+            <h3>${pharmacy.name}</h3>
+            <p><i class="fa-solid fa-location-dot"></i> ${pharmacy.address}</p>
+            <p><i class="fa-solid fa-phone"></i> ${pharmacy.phone}</p>
+            <p><i class="fa-solid fa-clock"></i> ${pharmacy.hours} 
+              <span class="status-badge ${statusClass}">${statusText}</span>
+            </p>
+            <p><i class="fa-solid fa-truck"></i> ${getServicesText(pharmacy.services)}</p>
+          </div>
+          <div class="card-actions">
+            <a href="#" class="btn-outline" onclick="showPharmacyDetails(${pharmacy.id})">Voir détails</a>
+            <button class="btn-primary" onclick="sendPrescription(${pharmacy.id})">Envoyer ordonnance</button>
+          </div>
+        `;
+        pharmacyGrid.appendChild(pharmacyCard);
+      });
+    }
+
+    // Obtenir le texte des services
+    function getServicesText(services) {
+      const serviceNames = {
+        'livraison': 'Livraison',
+        'mobile': 'Mobile Money',
+        '24h': '24h/24'
+      };
+      return services.map(service => serviceNames[service]).join(', ');
+    }
+
+    // Filtrer les pharmacies
+    function filterPharmacies() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const zoneValue = zoneFilter.value;
+      const serviceValue = serviceFilter.value;
+
+      const filtered = pharmacies.filter(pharmacy => {
+        const matchesSearch = pharmacy.name.toLowerCase().includes(searchTerm) ||
+                             pharmacy.address.toLowerCase().includes(searchTerm);
+        const matchesZone = !zoneValue || pharmacy.zone === zoneValue;
+        const matchesService = !serviceValue || pharmacy.services.includes(serviceValue);
+
+        return matchesSearch && matchesZone && matchesService;
+      });
+
+      displayPharmacies(filtered);
+      updateStats(filtered);
+    }
+
+    // Mettre à jour les statistiques
+    function updateStats(filteredPharmacies) {
+      document.getElementById('totalPharmacies').textContent = filteredPharmacies.length;
+      document.getElementById('openNow').textContent = filteredPharmacies.filter(p => p.status === 'open').length;
+      document.getElementById('open24h').textContent = filteredPharmacies.filter(p => p.services.includes('24h')).length;
+      document.getElementById('withDelivery').textContent = filteredPharmacies.filter(p => p.services.includes('livraison')).length;
+    }
+
+    // Afficher les détails d'une pharmacie
+    function showPharmacyDetails(pharmacyId) {
+      const pharmacy = pharmacies.find(p => p.id === pharmacyId);
+      if (!pharmacy) return;
+
+      modalTitle.textContent = pharmacy.name;
+      modalContent.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="${pharmacy.image}" alt="${pharmacy.name}" style="width: 100px; height: 100px; object-fit: contain;">
+        </div>
+        
+        <p><strong><i class="fa-solid fa-location-dot"></i> Adresse:</strong> ${pharmacy.address}</p>
+        <p><strong><i class="fa-solid fa-phone"></i> Téléphone:</strong> ${pharmacy.phone}</p>
+        <p><strong><i class="fa-solid fa-clock"></i> Horaires:</strong> ${pharmacy.hours}</p>
+        
+        <p><strong><i class="fa-solid fa-tags"></i> Services:</strong></p>
+        <div style="margin-bottom: 15px;">
+          ${pharmacy.services.map(service => 
+            `<span class="service-tag">${getServicesText([service])}</span>`
+          ).join('')}
+        </div>
+        
+        <p><strong><i class="fa-solid fa-info-circle"></i> Description:</strong></p>
+        <p style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          ${pharmacy.description}
+        </p>
+        
+        <div class="card-actions">
+          <button class="btn-primary" onclick="sendPrescription(${pharmacy.id})">
+            <i class="fa-solid fa-paper-plane"></i> Envoyer une ordonnance
+          </button>
+          <a href="tel:${pharmacy.phone.replace(/\s+/g, '')}" class="btn-outline">
+            <i class="fa-solid fa-phone"></i> Appeler
+          </a>
+        </div>
+      `;
+
+      pharmacyModal.style.display = 'flex';
+    }
+
+    // Envoyer une ordonnance
+    function sendPrescription(pharmacyId) {
+      const pharmacy = pharmacies.find(p => p.id === pharmacyId);
+      if (!pharmacy) return;
+
+      // Simuler l'envoi d'une ordonnance
+      alert(`Ordonnance envoyée à ${pharmacy.name}\n\nUne confirmation a été envoyée à la pharmacie.`);
+      
+      // Ici, vous intégreriez l'API réelle pour envoyer l'ordonnance
+      console.log(`Envoi d'ordonnance à: ${pharmacy.name}, Tel: ${pharmacy.phone}`);
+    }
+
+    // Fermer le modal
+    closeModal.addEventListener('click', () => {
+      pharmacyModal.style.display = 'none';
+    });
+
+    // Fermer le modal en cliquant à l'extérieur
+    pharmacyModal.addEventListener('click', (e) => {
+      if (e.target === pharmacyModal) {
+        pharmacyModal.style.display = 'none';
+      }
+    });
+
+    // Événements de recherche et filtres
+    searchInput.addEventListener('input', filterPharmacies);
+    zoneFilter.addEventListener('change', filterPharmacies);
+    serviceFilter.addEventListener('change', filterPharmacies);
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      displayPharmacies(pharmacies);
+      updateStats(pharmacies);
+    });
+  </script>
+</body>
+</html>

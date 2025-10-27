@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Patient - OrdoPass</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      color: #2a5298;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header h1 i {
+      color: #2a5298;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .patient-profile {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 768px) {
+      .patient-profile {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .profile-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      position: relative;
+    }
+    
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .profile-info h2 {
+      font-size: 22px;
+      color: #2a5298;
+      margin-bottom: 5px;
+    }
+    
+    .profile-info .badge {
+      background: #e9ecef;
+      color: #495057;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    
+    .info-item {
+      padding-bottom: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .info-value {
+      color: #333;
+    }
+    
+    .history-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      color: #2a5298;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .btn-link {
+      color: #2a5298;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+    
+    .consultation-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .consultation-item {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .consultation-info {
+      flex: 1;
+    }
+    
+    .consultation-number {
+      font-weight: bold;
+      color: #2a5298;
+      font-size: 1.1rem;
+    }
+    
+    .consultation-date {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 5px 0;
+    }
+    
+    .consultation-symptoms {
+      color: #333;
+      font-size: 0.95rem;
+    }
+    
+    .consultation-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn-outline {
+      border: 1px solid #2a5298;
+      color: #2a5298;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s;
+    }
+    
+    .btn-outline:hover {
+      background: #f0f5ff;
+    }
+    
+    .btn-primary {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background: #1e3c72;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
+    .ordonnance-history {
+      margin-top: 30px;
+    }
+    
+    .ordonnance-table {
+      margin-top: 15px;
+    }
+    
+    .empty-section {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+    }
+    
+    .empty-section i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-back {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .btn-back:hover {
+      background: #5a6268;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-content h3 {
+      margin-bottom: 20px;
+      color: #2a5298;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- En-tête -->
+    <div class="header">
+      <h1><i class="fa-solid fa-user-injured"></i> Profil Patient</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay">Dr Fatoumata Ndiaye</span>
+      </div>
+    </div>
+
+    <!-- Bouton retour -->
+    <button class="btn-back" onclick="goBack()">
+      <i class="fa-solid fa-arrow-left"></i> Retour à la liste des patients
+    </button>
+
+    <!-- Boutons d'action -->
+    <div class="action-buttons">
+      <button class="btn-primary" onclick="openEditModal()">
+        <i class="fa-solid fa-edit"></i> Modifier les informations
+      </button>
+      <button class="btn-success" onclick="newConsultation()">
+        <i class="fa-solid fa-file-medical"></i> Nouvelle consultation
+      </button>
+    </div>
+
+    <!-- Profil patient -->
+    <div class="patient-profile">
+      <!-- Carte de profil -->
+      <div class="profile-card">
+        <div class="profile-header">
+          <img id="patientAvatar" src="https://i.pravatar.cc/80" class="profile-avatar" alt="Diop Awa">
+          <div class="profile-info">
+            <h2 id="patientName">Diop Awa</h2>
+            <span class="badge">Patiente</span>
+          </div>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Date de naissance</div>
+            <div class="info-value" id="patientBirthdate">12 Dec, 1980</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Adresse</div>
+            <div class="info-value" id="patientAddress">Dakar, Senegal</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Téléphone</div>
+            <div class="info-value" id="patientPhone">+221 77 123 45 67</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">N° pièce d'identité</div>
+            <div class="info-value" id="patientId">SN12345678</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Sexe</div>
+            <div class="info-value" id="patientGender">Femme</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Date d'ajout</div>
+            <div class="info-value" id="patientAdded">13-07-2025</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Mode de paiement</div>
+            <div class="info-value" id="patientPayment">Wave</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Assurance</div>
+            <div class="info-value" id="patientInsurance">Oui</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Historique des consultations -->
+      <div class="history-section">
+        <h2 class="section-title"><i class="fa-solid fa-history"></i> Historique des consultations</h2>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>No ticket</th>
+              <th>Date</th>
+              <th>Symptômes</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1456</td>
+              <td>04/08/2025</td>
+              <td>Fièvre, fatigue, douleur...</td>
+              <td><a href="#" class="btn-link">✅ Voir</a></td>
+            </tr>
+            <tr>
+              <td>1302</td>
+              <td>12/06/2025</td>
+              <td>Toux sèche, fièvre légè...</td>
+              <td><a href="#" class="btn-link">✅ Voir</a></td>
+            </tr>
+            <tr>
+              <td>1178</td>
+              <td>22/03/2025</td>
+              <td>Brûlures urinaires</td>
+              <td><a href="#" class="btn-link">✅ Voir</a></td>
+            </tr>
+            <tr>
+              <td>1157</td>
+              <td>22/03/2025</td>
+              <td>Brûlures urinaires</td>
+              <td><a href="#" class="btn-link">✅ Voir</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="ordonnance-history">
+          <h3 class="section-title"><i class="fa-solid fa-prescription"></i> Historique des ordonnances</h3>
+          
+          <table class="ordonnance-table">
+            <thead>
+              <tr>
+                <th>N° Consultation</th>
+                <th>Date consultation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1456</td>
+                <td>04/08/2025</td>
+                <td><a href="#" class="btn-link">Voir ordonnance</a></td>
+              </tr>
+              <tr>
+                <td>1453</td>
+                <td>25/07/2025</td>
+                <td><a href="#" class="btn-link">Voir ordonnance</a></td>
+              </tr>
+              <tr>
+                <td>1450</td>
+                <td>15/07/2025</td>
+                <td><a href="#" class="btn-link">Voir ordonnance</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top: 30px;">
+          <h3 class="section-title"><i class="fa-solid fa-vial"></i> Historique des résultats du salivage</h3>
+          <div class="empty-section">
+            <i class="fa-solid fa-file-medical"></i>
+            <p>Aucun résultat de salivage disponible</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deuxième image - Version alternative -->
+    <div class="history-section">
+      <h2 class="section-title"><i class="fa-solid fa-prescription-bottle-medical"></i> OrdoPass</h2>
+      
+      <div class="consultation-list">
+        <div class="consultation-item">
+          <div class="consultation-info">
+            <div class="consultation-number">1456</div>
+            <div class="consultation-date">04/08/2025</div>
+            <div class="consultation-symptoms">Fièvre, fatigue, douleur...</div>
+          </div>
+          <div class="consultation-actions">
+            <a href="#" class="btn-outline">
+              <i class="fa-solid fa-eye"></i> Voir
+            </a>
+          </div>
+        </div>
+        
+        <div class="consultation-item">
+          <div class="consultation-info">
+            <div class="consultation-number">1302</div>
+            <div class="consultation-date">12/06/2025</div>
+            <div class="consultation-symptoms">Toux sèche, fièvre légè...</div>
+          </div>
+          <div class="consultation-actions">
+            <a href="#" class="btn-outline">
+              <i class="fa-solid fa-eye"></i> Voir
+            </a>
+          </div>
+        </div>
+        
+        <div class="consultation-item">
+          <div class="consultation-info">
+            <div class="consultation-number">1178</div>
+            <div class="consultation-date">22/03/2025</div>
+            <div class="consultation-symptoms">Brûlures urinaires</div>
+          </div>
+          <div class="consultation-actions">
+            <a href="#" class="btn-outline">
+              <i class="fa-solid fa-eye"></i> Voir
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="ordonnance-history">
+        <h3 class="section-title"><i class="fa-solid fa-prescription"></i> Historique des ordonnances</h3>
+        
+        <div class="consultation-list">
+          <div class="consultation-item">
+            <div class="consultation-info">
+              <div class="consultation-number">1456</div>
+              <div class="consultation-date">04/08/2025</div>
+            </div>
+            <div class="consultation-actions">
+              <a href="#" class="btn-outline">
+                <i class="fa-solid fa-eye"></i> Voir ordonnance
+              </a>
+            </div>
+          </div>
+          
+          <div class="consultation-item">
+            <div class="consultation-info">
+              <div class="consultation-number">1453</div>
+              <div class="consultation-date">25/07/2025</div>
+            </div>
+            <div class="consultation-actions">
+              <a href="#" class="btn-outline">
+                <i class="fa-solid fa-eye"></i> Voir ordonnance
+              </a>
+            </div>
+          </div>
+          
+          <div class="consultation-item">
+            <div class="consultation-info">
+              <div class="consultation-number">1450</div>
+              <div class="consultation-date">15/07/2025</div>
+            </div>
+            <div class="consultation-actions">
+              <a href="#" class="btn-outline">
+                <i class="fa-solid fa-eye"></i> Voir ordonnance
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 30px;">
+        <h3 class="section-title"><i class="fa-solid fa-file-medical-alt"></i> Historique des résultats d'analyses</h3>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Date de l'examen</th>
+              <th>Motif</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>04/08/2025</td>
+              <td>Analyse sanguine</td>
+              <td><a href="#" class="btn-link">Voir details</a></td>
+            </tr>
+            <tr>
+              <td>15/07/2025</td>
+              <td>Radiographie thoracique</td>
+              <td><a href="#" class="btn-link">Voir details</a></td>
+            </tr>
+            <tr>
+              <td>10/06/2025</td>
+              <td>Analyse urinaire</td>
+              <td><a href="#" class="btn-link">Voir details</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour modifier les informations -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3>Modifier les informations du patient</h3>
+      
+      <div class="form-group">
+        <label class="form-label">Nom complet</label>
+        <input type="text" class="form-control" id="editName" value="Diop Awa">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Date de naissance</label>
+        <input type="text" class="form-control" id="editBirthdate" value="12 Dec, 1980">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Adresse</label>
+        <input type="text" class="form-control" id="editAddress" value="Dakar, Senegal">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Téléphone</label>
+        <input type="text" class="form-control" id="editPhone" value="+221 77 123 45 67">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">N° pièce d'identité</label>
+        <input type="text" class="form-control" id="editId" value="SN12345678">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Sexe</label>
+        <select class="form-control" id="editGender">
+          <option value="Femme" selected>Femme</option>
+          <option value="Homme">Homme</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Mode de paiement</label>
+        <select class="form-control" id="editPayment">
+          <option value="Wave" selected>Wave</option>
+          <option value="Orange Money">Orange Money</option>
+          <option value="Free Money">Free Money</option>
+          <option value="Espèces">Espèces</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Assurance</label>
+        <select class="form-control" id="editInsurance">
+          <option value="Oui" selected>Oui</option>
+          <option value="Non">Non</option>
+        </select>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn-outline" onclick="closeEditModal()">Annuler</button>
+        <button class="btn-primary" onclick="savePatientInfo()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Récupérer les données du patient
+    function loadPatientData() {
+      const patientData = JSON.parse(localStorage.getItem('currentPatient'));
+      
+      if (patientData) {
+        document.getElementById('patientName').textContent = patientData.name;
+        document.getElementById('patientAvatar').src = patientData.image || 'https://i.pravatar.cc/80';
+        document.getElementById('patientAddress').textContent = patientData.address;
+        document.getElementById('patientPhone').textContent = patientData.phone;
+        document.getElementById('patientAdded').textContent = patientData.added;
+        
+        // Calculer l'âge approximatif pour la date de naissance
+        const birthYear = new Date().getFullYear() - patientData.age;
+        document.getElementById('patientBirthdate').textContent = `12 Dec, ${birthYear}`;
+      }
+    }
+
+    function goBack() {
+      window.location.href = 'patients.html';
+    }
+
+    // Ouvrir le modal de modification
+    function openEditModal() {
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    // Fermer le modal de modification
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Sauvegarder les informations modifiées
+    function savePatientInfo() {
+      // Récupérer les valeurs du formulaire
+      const name = document.getElementById('editName').value;
+      const birthdate = document.getElementById('editBirthdate').value;
+      const address = document.getElementById('editAddress').value;
+      const phone = document.getElementById('editPhone').value;
+      const id = document.getElementById('editId').value;
+      const gender = document.getElementById('editGender').value;
+      const payment = document.getElementById('editPayment').value;
+      const insurance = document.getElementById('editInsurance').value;
+
+      // Mettre à jour l'affichage
+      document.getElementById('patientName').textContent = name;
+      document.getElementById('patientBirthdate').textContent = birthdate;
+      document.getElementById('patientAddress').textContent = address;
+      document.getElementById('patientPhone').textContent = phone;
+      document.getElementById('patientId').textContent = id;
+      document.getElementById('patientGender').textContent = gender;
+      document.getElementById('patientPayment').textContent = payment;
+      document.getElementById('patientInsurance').textContent = insurance;
+
+      // Mettre à jour les données dans le localStorage
+      const patientData = JSON.parse(localStorage.getItem('currentPatient'));
+      if (patientData) {
+        patientData.name = name;
+        patientData.address = address;
+        patientData.phone = phone;
+        localStorage.setItem('currentPatient', JSON.stringify(patientData));
+      }
+
+      // Mettre à jour la liste des patients
+      const patients = JSON.parse(localStorage.getItem('patients')) || [];
+      const patientIndex = patients.findIndex(p => p.id === patientData.id);
+      if (patientIndex !== -1) {
+        patients[patientIndex].name = name;
+        patients[patientIndex].address = address;
+        patients[patientIndex].phone = phone;
+        localStorage.setItem('patients', JSON.stringify(patients));
+      }
+
+      closeEditModal();
+      alert('Informations du patient mises à jour avec succès!');
+    }
+
+    // Nouvelle consultation
+    function newConsultation() {
+      const patientData = JSON.parse(localStorage.getItem('currentPatient'));
+      if (patientData) {
+        // Stocker les données du patient pour la nouvelle consultation
+        localStorage.setItem('consultationPatient', JSON.stringify(patientData));
+        // Rediriger vers la page de nouvelle consultation
+        window.location.href = 'nouvelle_consultation.html';
+      } else {
+        alert('Aucune donnée patient disponible');
+      }
+    }
+
+    // Script pour gérer les interactions utilisateur
+    document.addEventListener('DOMContentLoaded', function() {
+      // Charger les données du patient
+      loadPatientData();
+      
+      // Ajouter des écouteurs d'événements pour les boutons "Voir"
+      document.querySelectorAll('.btn-link, .btn-outline').forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = this.getAttribute('data-target');
+          if (target) {
+            // Logique pour afficher les détails
+            alert('Affichage des détails pour ' + target);
+          } else {
+            alert('Fonctionnalité de visualisation');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

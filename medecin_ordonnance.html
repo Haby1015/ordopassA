@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ordonnances - OrdoPass</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background: #f5f5f5; }
+    .sidebar { width:230px; float:left; height:100vh; background:#2a5298; color:white; padding:15px; position: fixed; }
+    .sidebar a { display:block; padding:10px; color:white; text-decoration:none; border-radius: 5px; margin: 5px 0; }
+    .sidebar a.active, .sidebar a:hover { background:#1e3c72; }
+    .main-area { margin-left:230px; padding:20px; }
+    .card { background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .preview { margin-top:20px; border:1px solid #ddd; padding:25px; border-radius:8px; background: white; }
+    .preview .logo { max-width:120px; margin-bottom:10px; display:block; margin-left:auto; margin-right:auto; }
+    .signature { max-width:150px; margin-top:15px; }
+    .btn-primary, .btn-secondary { padding:10px 20px; margin:5px; border:none; border-radius:5px; cursor:pointer; font-size: 14px; }
+    .btn-primary { background:#2a5298; color:#fff; }
+    .btn-secondary { background:#28a745; color:#fff; }
+    .btn-danger { background:#dc3545; color:#fff; }
+    .medecin-name { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+    .center-content { text-align:center; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+    .tab { padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab.active { border-bottom: 3px solid #2a5298; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .ordonnance-list { max-height: 400px; overflow-y: auto; }
+    .ordonnance-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    .ordonnance-item h4 { margin: 0 0 10px 0; }
+    .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; }
+    .status-active { background: #d4edda; color: #155724; }
+    .status-delivree { background: #cce7ff; color: #004085; }
+    .status-annulee { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo" style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">ORDOPASS</div>
+    <nav>
+      <a class="nav-link" href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+         <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Zone principale -->
+  <main class="main-area">
+    <div class="tabs">
+      <div class="tab active" data-tab="create">Créer une ordonnance</div>
+      <div class="tab" data-tab="list">Mes ordonnances</div>
+      <div class="tab" data-tab="search">Rechercher</div>
+    </div>
+
+    <!-- Création d'ordonnance -->
+    <div class="tab-content active" id="create-tab">
+      <div class="card">
+        <h1><i class="fa-solid fa-file-prescription"></i> Créer une ordonnance</h1>
+
+        <form id="ordForm" autocomplete="off">
+          <div class="form-group">
+            <label>Nom du médecin</label>
+            <input type="text" id="nomMedecin" placeholder="Dr ..." required>
+          </div>
+
+          <div class="form-group">
+            <label>Nom du patient</label>
+            <input type="text" id="nom" required>
+          </div>
+
+          <div class="form-group">
+            <label>Âge</label>
+            <input type="number" id="age" required>
+          </div>
+
+          <div class="form-group">
+            <label>Sexe</label>
+            <select id="genre" required>
+              <option value="">-- Choisir --</option>
+              <option>F</option>
+              <option>M</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" id="adresse" required>
+          </div>
+
+          <div class="form-group">
+            <label>Poids (optionnel)</label>
+            <input type="text" id="poids">
+          </div>
+
+          <div class="form-group">
+            <label>Médicaments et posologie</label>
+            <textarea id="medicaments" rows="5" placeholder="Ex: Paracétamol 1000mg - 1 comprimé 3 fois par jour pendant 5 jours" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="dateOrd">
+          </div>
+
+          <div class="buttons">
+            <button type="button" id="genBtn" class="btn-primary"><i class="fa-solid fa-eye"></i> Prévisualiser</button>
+            <button type="button" id="saveBtn" class="btn-secondary"><i class="fa-solid fa-save"></i> Sauvegarder</button>
+            <button type="button" id="pdfBtn" class="btn-danger" disabled><i class="fa-solid fa-file-pdf"></i> Télécharger PDF</button>
+          </div>
+        </form>
+
+        <!-- Aperçu -->
+        <div class="preview" id="preview">
+          <img id="logoImg" alt="Logo OrdoPass" class="logo">
+          <h2 style="text-align: center;">Ordonnance médicale</h2>
+          <p class="medecin-name">Médecin : <span id="pMedecin"></span></p>
+
+          <div class="center-content">
+            <p><b>Patient :</b> <span id="pNom"></span></p>
+            <p><b>Âge :</b> <span id="pAge"></span> • <b>Sexe :</b> <span id="pGenre"></span></p>
+            <p><b>Adresse :</b> <span id="pAdresse"></span></p>
+            <p><b>Poids :</b> <span id="pPoids"></span></p>
+            <p><b>Date :</b> <span id="pDate"></span></p>
+            <p><b>Code :</b> <span id="pCode"></span></p>
+            <p><b>Prescription :</b><br><span id="pMedic" style="white-space: pre-line;"></span></p>
+          </div>
+
+          <div id="qrcode" style="text-align: center; margin: 20px 0;"></div>
+          <img id="signImg" alt="Signature du médecin" class="signature" style="display: block; margin: 0 auto;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des ordonnances -->
+    <div class="tab-content" id="list-tab">
+      <div class="card">
+        <h1><i class="fa-solid fa-list"></i> Mes ordonnances</h1>
+        <div class="ordonnance-list" id="ordonnanceList">
+          <!-- Les ordonnances seront chargées ici -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Recherche d'ordonnance -->
+    <div class="tab-content" id="search-tab">
+      <div class="card">
+        <h1><i class="fa-solid fa-search"></i> Rechercher une ordonnance</h1>
+        <div class="form-group">
+          <label>Code de l'ordonnance</label>
+          <input type="text" id="searchCode" placeholder="Entrez le code de l'ordonnance">
+        </div>
+        <button type="button" id="searchBtn" class="btn-primary"><i class="fa-solid fa-search"></i> Rechercher</button>
+        
+        <div class="preview" id="searchResult" style="display: none;">
+          <h3>Résultat de la recherche</h3>
+          <div id="searchContent"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  // Configuration
+  const logoBase64 = "data:image/png;base64,BASE64_LOGO_ICI";  
+  const signBase64 = "data:image/png;base64,BASE64_SIGNATURE_ICI";  
+
+  // Initialisation
+  document.getElementById("logoImg").src = logoBase64;
+  document.getElementById("signImg").src = signBase64;
+  document.getElementById("dateOrd").valueAsDate = new Date();
+
+  // Gestion des onglets
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+      
+      if (tab.dataset.tab === 'list') {
+        loadOrdonnances();
+      }
+    });
+  });
+
+  // Génération de l'aperçu
+  document.getElementById("genBtn").addEventListener("click", function(){
+    generatePreview();
+  });
+
+  // Sauvegarde de l'ordonnance
+  document.getElementById("saveBtn").addEventListener("click", async function(){
+    await saveOrdonnance();
+  });
+
+  // Génération PDF
+  document.getElementById("pdfBtn").addEventListener("click", function(){
+    generatePDF();
+  });
+
+  // Recherche d'ordonnance
+  document.getElementById("searchBtn").addEventListener("click", async function(){
+    await searchOrdonnance();
+  });
+
+  function generatePreview() {
+    const medecin = document.getElementById("nomMedecin").value.trim();
+    const nom = document.getElementById("nom").value.trim();
+    const age = document.getElementById("age").value.trim() + " ans";
+    const genre = document.getElementById("genre").value;
+    const adresse = document.getElementById("adresse").value.trim();
+    const medic = document.getElementById("medicaments").value.trim();
+    const poids = document.getElementById("poids").value.trim();
+    const dateField = document.getElementById("dateOrd").value;
+    const dateNow = dateField ? new Date(dateField).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+
+    // Injection HTML
+    document.getElementById("pMedecin").innerText = medecin;
+    document.getElementById("pNom").innerText = nom;
+    document.getElementById("pAge").innerText = age;
+    document.getElementById("pGenre").innerText = genre;
+    document.getElementById("pAdresse").innerText = adresse;
+    document.getElementById("pPoids").innerText = poids || "-";
+    document.getElementById("pDate").innerText = dateNow;
+    document.getElementById("pMedic").innerText = medic;
+
+    // Générer un code temporaire pour l'aperçu
+    const tempCode = 'ORD' + Date.now().toString(36).toUpperCase();
+    document.getElementById("pCode").innerText = tempCode;
+
+    // QR code
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), { 
+      text: `https://ordopass.sn/verify?code=${tempCode}`, 
+      width: 100, 
+      height: 100 
+    });
+
+    document.getElementById("preview").style.display = "block";
+    document.getElementById("pdfBtn").disabled = false;
+  }
+
+  async function saveOrdonnance() {
+    const medecin = document.getElementById("nomMedecin").value.trim();
+    const nom = document.getElementById("nom").value.trim();
+    const age = document.getElementById("age").value.trim();
+    const genre = document.getElementById("genre").value;
+    const adresse = document.getElementById("adresse").value.trim();
+    const medic = document.getElementById("medicaments").value.trim();
+    const poids = document.getElementById("poids").value.trim();
+    const dateField = document.getElementById("dateOrd").value;
+
+    if (!medecin || !nom || !age || !genre || !adresse || !medic) {
+      alert("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/ordonnances', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          medecinNom: medecin,
+          patientNom: nom,
+          patientAge: age,
+          patientGenre: genre,
+          patientAdresse: adresse,
+          patientPoids: poids,
+          medicaments: medic,
+          dateOrd: dateField
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Ordonnance sauvegardée avec succès! Code: ' + data.ordonnance.code);
+        // Actualiser la liste des ordonnances
+        loadOrdonnances();
+      } else {
+        alert('Erreur: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de la sauvegarde');
+    }
+  }
+
+  async function loadOrdonnances() {
+    try {
+      const response = await fetch('/api/ordonnances');
+      const ordonnances = await response.json();
+
+      const listContainer = document.getElementById('ordonnanceList');
+      listContainer.innerHTML = '';
+
+      if (ordonnances.length === 0) {
+        listContainer.innerHTML = '<p>Aucune ordonnance trouvée.</p>';
+        return;
+      }
+
+      ordonnances.forEach(ord => {
+        const ordItem = document.createElement('div');
+        ordItem.className = 'ordonnance-item';
+        
+        const statusClass = `status-${ord.statut}`;
+        const statusText = ord.statut === 'active' ? 'Active' : 
+                          ord.statut === 'delivree' ? 'Délivrée' : 'Annulée';
+
+        ordItem.innerHTML = `
+          <h4>Ordonnance pour ${ord.patientNom}</h4>
+          <p><strong>Code:</strong> ${ord.code}</p>
+          <p><strong>Date:</strong> ${ord.dateOrd}</p>
+          <p><strong>Statut:</strong> <span class="status-badge ${statusClass}">${statusText}</span></p>
+          <p><strong>Médecin:</strong> ${ord.medecinNom}</p>
+          <button onclick="viewOrdonnance('${ord._id}')" class="btn-primary">Voir</button>
+          <button onclick="downloadOrdonnancePDF('${ord._id}')" class="btn-secondary">PDF</button>
+        `;
+
+        listContainer.appendChild(ordItem);
+      });
+    } catch (error) {
+      console.error('Erreur:', error);
+    }
+  }
+
+  async function searchOrdonnance() {
+    const code = document.getElementById('searchCode').value.trim();
+    
+    if (!code) {
+      alert('Veuillez entrer un code de recherche');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/ordonnances/search/${code}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const resultDiv = document.getElementById('searchContent');
+        resultDiv.innerHTML = `
+          <p><strong>Patient:</strong> ${data.patientNom}</p>
+          <p><strong>Âge:</strong> ${data.patientAge}</p>
+          <p><strong>Sexe:</strong> ${data.patientGenre}</p>
+          <p><strong>Médecin:</strong> ${data.medecinNom}</p>
+          <p><strong>Date:</strong> ${data.dateOrd}</p>
+          <p><strong>Statut:</strong> ${data.statut}</p>
+          <p><strong>Prescription:</strong><br>${data.medicaments}</p>
+        `;
+        document.getElementById('searchResult').style.display = 'block';
+      } else {
+        alert('Ordonnance non trouvée: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de la recherche');
+    }
+  }
+
+  function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const medecin = document.getElementById("nomMedecin").value.trim();
+    const nom = document.getElementById("nom").value.trim();
+    const age = document.getElementById("age").value.trim() + " ans";
+    const genre = document.getElementById("genre").value;
+    const adresse = document.getElementById("adresse").value.trim();
+    const medic = document.getElementById("medicaments").value.trim();
+    const poids = document.getElementById("poids").value.trim();
+    const dateField = document.getElementById("dateOrd").value;
+    const dateNow = dateField ? new Date(dateField).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR");
+    const code = document.getElementById("pCode").innerText;
+
+    // En-tête
+    doc.setFillColor(42, 82, 152);
+    doc.rect(0, 0, 210, 25, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text("Ordonnance médicale", 105, 15, { align: "center" });
+
+    // Informations médecin
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Médecin : ${medecin}`, 105, 35, { align: "center" });
+
+    // Informations patient
+    doc.setFontSize(12);
+    doc.text(`Patient : ${nom}`, 20, 50);
+    doc.text(`Âge : ${age}`, 20, 58);
+    doc.text(`Sexe : ${genre}`, 20, 66);
+    doc.text(`Adresse : ${adresse}`, 20, 74);
+    if (poids) doc.text(`Poids : ${poids}`, 20, 82);
+    doc.text(`Date : ${dateNow}`, 20, 90);
+    doc.text(`Code : ${code}`, 20, 98);
+
+    // Prescription
+    doc.setFontSize(13);
+    doc.setTextColor(42, 82, 152);
+    doc.text("PRESCRIPTION MÉDICALE", 20, 115);
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    const splitText = doc.splitTextToSize(medic, 170);
+    doc.text(splitText, 20, 125);
+
+    // Signature et QR Code
+    doc.setFontSize(10);
+    doc.text("Signature et cachet du médecin:", 20, 200);
+    doc.addImage(signBase64, "PNG", 20, 205, 40, 20);
+
+    const qrImg = document.querySelector("#qrcode img");
+    if (qrImg) {
+      doc.addImage(qrImg.src, "PNG", 150, 190, 40, 40);
+    }
+
+    // Pied de page
+    doc.setFillColor(42, 82, 152);
+    doc.rect(0, 275, 210, 20, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text("OrdoPass - Système sécurisé de gestion des ordonnances", 105, 283, { align: "center" });
+    doc.text("www.ordopass.sn - contact@ordopass.sn - +221 77 123 45 67", 105, 289, { align: "center" });
+
+    doc.save(`ordonnance_${nom.replace(/\s+/g, "_")}_${code}.pdf`);
+  }
+
+  async function viewOrdonnance(id) {
+    // Rediriger vers une page de détail ou afficher dans un modal
+    window.location.href = `/ordonnance_detail.html?id=${id}`;
+  }
+
+  async function downloadOrdonnancePDF(id) {
+    // Implémenter le téléchargement PDF d'une ordonnance existante
+    alert('Fonctionnalité à implémenter');
+  }
+
+  // Charger les ordonnances au chargement de la page
+  document.addEventListener('DOMContentLoaded', function() {
+    loadOrdonnances();
+  });
+</script>
+</body>
+</html>

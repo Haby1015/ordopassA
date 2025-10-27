@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inscription — OrdoPass</title>
+  <link rel="stylesheet" href="style2.css" />
+</head>
+<body>
+  <div class="split-layout">
+
+    <!-- 🖼️ Image à gauche -->
+    <div class="side-image" style="background-image:url('images/accueil-bg.png');">
+      <div class="side-overlay"></div>
+      <div class="side-content">
+        <h2>Bienvenue sur OrdoPass</h2>
+        <p>Créez votre compte médecin ou pharmacien pour accéder à la plateforme sécurisée d’ordonnances numériques.</p>
+      </div>
+    </div>
+
+    <!-- 🧾 Formulaire d'inscription -->
+    <div class="form-side">
+      <div class="form-card" style="max-width:460px;">
+        <div style="text-align:center;margin-bottom:8px;">
+          <!-- Logo OrdoPass -->
+          <svg viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="height:36px;">
+            <defs>
+              <linearGradient id="g5" x1="0" x2="1">
+                <stop offset="0" stop-color="#2a5298"/>
+                <stop offset="1" stop-color="#1e3c72"/>
+              </linearGradient>
+            </defs>
+            <text x="0" y="28" font-family="Inter, Arial" font-size="24" font-weight="700" fill="url(#g5)">
+              Ordo<tspan fill="#0ea5a0">Pass</tspan>
+            </text>
+          </svg>
+          <h2 style="margin:10px 0 0;">Créer un compte</h2>
+        </div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input id="username" class="input" type="text" placeholder="Choisissez un nom d'utilisateur" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input id="password" class="input" type="password" placeholder="Créez un mot de passe" required>
+          </div>
+
+          <div class="form-group">
+            <label for="role">Rôle</label>
+            <select id="role" class="input" required>
+              <option value="">-- Sélectionner --</option>
+              <option value="medecin">Médecin</option>
+              <option value="pharmacien">Pharmacien</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" type="submit">Créer le compte</button>
+
+          <div style="text-align:center;margin-top:12px;color:var(--muted);">
+            Déjà un compte ? <a href="index.html">Se connecter</a>
+          </div>
+
+          <div id="messageBox" class="message-box" style="display:none"></div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+
+  <!-- 🧠 Script pour changer l’image selon le rôle -->
+  <script>
+    const msg = document.getElementById('messageBox');
+    const observer = new MutationObserver(() => {
+      if (msg && msg.textContent.trim() !== '') msg.style.display = 'block';
+    });
+    if (msg) observer.observe(msg, { childList: true, subtree: true });
+
+    // 🎨 Changement d’image selon le rôle sélectionné
+    const roleSelect = document.getElementById('role');
+    const sideImage = document.querySelector('.side-image');
+
+    roleSelect.addEventListener('change', () => {
+      if (roleSelect.value === 'medecin') {
+        sideImage.style.backgroundImage = "url('images/medecin-bg.jpg')";
+      } else if (roleSelect.value === 'pharmacien') {
+        sideImage.style.backgroundImage = "url('images/pharmacien-bg.jpg')";
+      } else {
+        sideImage.style.backgroundImage = "url('images/register-bg.jpg')";
+      }
+    });
+  </script>
+</body>
+</html>

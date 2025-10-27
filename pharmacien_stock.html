@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestion du stock — OrdoPass</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://kit.fontawesome.com/a2e0e6ad8c.js" crossorigin="anonymous"></script>
+  <style>
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .stock-table th, .stock-table td {
+      border-bottom: 1px solid #e4edf3;
+      padding: 10px;
+      text-align: left;
+    }
+    .stock-table th {
+      background: #f6f9fc;
+      font-weight: 600;
+      color: #345;
+    }
+    .actions button {
+      margin: 0 4px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .actions button.edit { color: #007bff; }
+    .actions button.delete { color: #e53935; }
+
+    .btn-add {
+      background: #0ea5a0;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-add:hover {
+      background: #0c8a87;
+    }
+    .form-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 90%;
+      max-width: 400px;
+    }
+    .form-popup.active { display: block; }
+    .form-popup h3 { margin-top: 0; color: #234a6a; }
+    .form-popup input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .form-popup .btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .form-popup .btns button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-cancel { background: #e4e9ee; }
+    .btn-save { background: #0ea5a0; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+     <aside class="sidebar">
+    <div class="logo">ORDO<span>PASS</span></div>
+    <nav class="menu">
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-house-medical"></i> <span>Tableau de bord</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-prescription"></i> <span>Ordonnances</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-user-md"></i> <span>Médecins</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-boxes-stacked"></i> <span>Gestion Stock</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Facturation</span></a>
+      <a href="pharmacien_dashboard.html"><i class="fa-solid fa-comment-medical"></i> <span>Messagerie</span></a>
+      <a href="pharmacien_parametres.html" class="active"><i class="fa-solid fa-gear"></i> <span>Paramètres</span></a>
+    </nav>
+    <div id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</div>
+  </aside>
+
+
+    <!-- Contenu principal -->
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Gestion du stock</div>
+        <div class="user-box">
+          <img class="avatar" src="https://i.pravatar.cc/80?img=14" alt="avatar" />
+          <div>
+            <div id="userName">Pharmacie Centrale</div>
+            <small style="color:#6b8392">Connecté</small>
+          </div>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 style="color:#234a6a;">Liste des médicaments</h3>
+          <button class="btn-add" id="addMedBtn"><i class="fa-solid fa-plus"></i> Ajouter</button>
+        </div>
+
+        <table class="stock-table" id="stockTable">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Quantité</th>
+              <th>Prix (CFA)</th>
+              <th>Date d’expiration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="stockBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- Popup formulaire -->
+  <div class="form-popup" id="formPopup">
+    <h3 id="popupTitle">Ajouter un médicament</h3>
+    <input type="text" id="medName" placeholder="Nom du médicament" required />
+    <input type="number" id="medQty" placeholder="Quantité" required />
+    <input type="number" id="medPrice" placeholder="Prix (CFA)" required />
+    <input type="date" id="medExpiry" required />
+    <div class="btns">
+      <button class="btn-cancel" id="cancelBtn">Annuler</button>
+      <button class="btn-save" id="saveBtn">Enregistrer</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Données stockées localement ---
+    let stock = JSON.parse(localStorage.getItem("stock")) || [];
+    let editIndex = null;
+
+    const stockBody = document.getElementById("stockBody");
+    const formPopup = document.getElementById("formPopup");
+    const addBtn = document.getElementById("addMedBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn = document.getElementById("saveBtn");
+
+    const medName = document.getElementById("medName");
+    const medQty = document.getElementById("medQty");
+    const medPrice = document.getElementById("medPrice");
+    const medExpiry = document.getElementById("medExpiry");
+
+    function renderStock() {
+      stockBody.innerHTML = "";
+      stock.forEach((med, i) => {
+        stockBody.innerHTML += `
+          <tr>
+            <td>${med.name}</td>
+            <td>${med.qty}</td>
+            <td>${med.price}</td>
+            <td>${med.expiry}</td>
+            <td class="actions">
+              <button class="edit" onclick="editMed(${i})"><i class="fa-solid fa-pen"></i></button>
+              <button class="delete" onclick="deleteMed(${i})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>`;
+      });
+      localStorage.setItem("stock", JSON.stringify(stock));
+    }
+
+    function resetForm() {
+      medName.value = "";
+      medQty.value = "";
+      medPrice.value = "";
+      medExpiry.value = "";
+    }
+
+    addBtn.onclick = () => {
+      editIndex = null;
+      document.getElementById("popupTitle").textContent = "Ajouter un médicament";
+      resetForm();
+      formPopup.classList.add("active");
+    };
+
+    cancelBtn.onclick = () => formPopup.classList.remove("active");
+
+    saveBtn.onclick = () => {
+      const med = {
+        name: medName.value.trim(),
+        qty: parseInt(medQty.value),
+        price: parseInt(medPrice.value),
+        expiry: medExpiry.value
+      };
+      if (!med.name || !med.qty || !med.price || !med.expiry) {
+        alert("Veuillez remplir tous les champs !");
+        return;
+      }
+
+      if (editIndex !== null) stock[editIndex] = med;
+      else stock.push(med);
+
+      formPopup.classList.remove("active");
+      renderStock();
+    };
+
+    function editMed(i) {
+      editIndex = i;
+      const med = stock[i];
+      medName.value = med.name;
+      medQty.value = med.qty;
+      medPrice.value = med.price;
+      medExpiry.value = med.expiry;
+      document.getElementById("popupTitle").textContent = "Modifier le médicament";
+      formPopup.classList.add("active");
+    }
+
+    function deleteMed(i) {
+      if (confirm("Supprimer ce médicament ?")) {
+        stock.splice(i, 1);
+        renderStock();
+      }
+    }
+
+    // Rendre accessible les fonctions globalement
+    window.editMed = editMed;
+    window.deleteMed = deleteMed;
+
+    renderStock();
+
+    // Déconnexion
+    document.getElementById("logout").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("currentUser");
+      alert("Vous êtes déconnecté !");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

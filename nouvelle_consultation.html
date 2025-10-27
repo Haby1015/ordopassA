@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nouvelle Consultation - OrdoPass</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f5f5f5; }
+    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .status.done { color:green; font-weight:bold; }
+    .status.pending { color:orange; font-weight:bold; }
+    .btn-outline { border:1px solid #2a5298; color:#2a5298; padding:8px 15px; border-radius:5px; cursor:pointer; background:#fff; }
+    .btn-primary { background:#2a5298; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; }
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
+    .modal-content { background:#fff; padding:25px; border-radius:8px; width:90%; max-width:800px; max-height:90vh; overflow-y:auto; }
+    .modal-content input, .modal-content select, .modal-content textarea { width:100%; padding:10px; margin-bottom:15px; box-sizing:border-box; border:1px solid #ddd; border-radius:5px; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th, td { padding:12px; text-align:left; border-bottom:1px solid #ccc; }
+    
+    /* Styles spécifiques pour la nouvelle consultation */
+    .consultation-form { background:white; padding:25px; border-radius:8px; margin:20px 0; }
+    .form-section { margin-bottom:30px; padding-bottom:20px; border-bottom:1px solid #eee; }
+    .form-section h3 { color:#2a5298; margin-bottom:15px; }
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:15px; margin-bottom:20px; }
+    .form-group { margin-bottom:15px; }
+    .form-label { display:block; margin-bottom:5px; font-weight:bold; color:#555; }
+    .form-control { width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box; }
+    textarea.form-control { min-height:80px; resize:vertical; }
+    .medication-item, .analysis-item, .facture-item { 
+      background:#f9f9f9; border:1px solid #eee; border-radius:5px; padding:15px; margin-bottom:10px; 
+    }
+    .item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .remove-btn { background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; }
+    .action-buttons { display:flex; gap:10px; margin-top:25px; flex-wrap:wrap; }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-notes-medical"></i> ORDOPASS</div>
+    <nav>
+      <a href="medecin_dashboard.html"><i class="fa-solid fa-file-medical"></i> Consultations</a>
+      <a href="patients.html"><i class="fa-solid fa-users"></i> Patients</a>
+      <a href="teleconsultation.html"><i class="fa-solid fa-video"></i> Téléconsultation</a>
+      <a href="pharmacies.html"><i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacies</a>
+      <a href="medecin_messagerie.html"><i class="fa-solid fa-comment-medical"></i> Messagerie</a>
+      <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
+      <a href="medecin_facturation.html"><i class="fa-solid fa-file-invoice-dollar"></i> Facturation</a>
+      <a href="medecin_rendezvous.html"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+      <a href="medecin_ordonnance.html"><i class="fa-solid fa-prescription"></i> Ordonnances sécurisées</a>
+         <a href="#" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </nav>
+  </aside>
+
+  <!-- Contenu -->
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-file-medical"></i> Nouvelle Consultation</h1>
+      <div class="user-info">
+        <img src="https://i.pravatar.cc/40" class="avatar" alt="profil">
+        <span id="usernameDisplay"></span>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="card">
+        <form id="consultationForm" class="consultation-form">
+          <!-- Informations de base -->
+          <div class="form-section">
+            <h3>Informations de la consultation</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Numéro de ticket *</label>
+                <input type="text" class="form-control" id="ticket" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nom du patient *</label>
+                <input type="text" class="form-control" id="nom" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Prénom du patient *</label>
+                <input type="text" class="form-control" id="prenom" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Image du patient (URL)</label>
+                <input type="text" class="form-control" id="image">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date *</label>
+                <input type="date" class="form-control" id="date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Heure *</label>
+                <input type="time" class="form-control" id="heure" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Motif de consultation *</label>
+                <input type="text" class="form-control" id="motif" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Statut *</label>
+                <select class="form-control" id="statut" required>
+                  <option value="En attente">En attente</option>
+                  <option value="En cours">En cours</option>
+                  <option value="Terminé">Terminé</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Symptômes -->
+          <div class="form-section">
+            <h3>Symptômes</h3>
+            <div class="form-group">
+              <label class="form-label">Description des symptômes *</label>
+              <textarea class="form-control" id="symptomes" placeholder="Décrire les symptômes du patient..." required></textarea>
+            </div>
+          </div>
+
+          <!-- Analyses à faire -->
+          <div class="form-section">
+            <h3>Analyses médicales</h3>
+            <div class="form-group">
+              <label class="form-label">Analyses prescrites</label>
+              <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" class="form-control" id="newAnalysis" placeholder="Nom de l'analyse" style="flex:1;">
+                <button type="button" class="btn-outline" onclick="addAnalysis()">
+                  <i class="fa-solid fa-plus"></i> Ajouter
+                </button>
+              </div>
+              <div id="analysesList"></div>
+            </div>
+          </div>
+
+          <!-- Examens physiques -->
+          <div class="form-section">
+            <h3>Examens physiques</h3>
+            <div class="form-group">
+              <label class="form-label">Résultats des examens</label>
+              <textarea class="form-control" id="examens" placeholder="Résultats des examens physiques..."></textarea>
+            </div>
+          </div>
+
+          <!-- Ordonnances -->
+          <div class="form-section">
+            <h3>Ordonnance médicale</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Médicament</label>
+                <input type="text" class="form-control" id="medicament" placeholder="Nom du médicament">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dosage</label>
+                <input type="text" class="form-control" id="dosage" placeholder="Ex: 500mg">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Posologie</label>
+                <input type="text" class="form-control" id="posologie" placeholder="Ex: 1 comprimé matin et soir">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Durée</label>
+                <input type="text" class="form-control" id="duree" placeholder="Ex: 5 jours">
+              </div>
+            </div>
+            <button type="button" class="btn-outline" onclick="addMedication()">
+              <i class="fa-solid fa-plus"></i> Ajouter le médicament
+            </button>
+            <div id="medicationsList" style="margin-top:15px;"></div>
+          </div>
+
+          <!-- Facturation -->
+          <div class="form-section">
+            <h3>Facturation</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Montant (FCFA)</label>
+                <input type="number" class="form-control" id="montant" placeholder="Montant de la consultation">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Statut de paiement</label>
+                <select class="form-control" id="statutPaiement">
+                  <option value="En attente">En attente</option>
+                  <option value="Payé">Payé</option>
+                  <option value="Partiel">Partiel</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn-outline" onclick="addFacture()">
+              <i class="fa-solid fa-plus"></i> Ajouter la facture
+            </button>
+            <div id="facturesList" style="margin-top:15px;"></div>
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="action-buttons">
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Enregistrer la consultation
+            </button>
+            <button type="button" class="btn-outline" onclick="goBack()">
+              <i class="fa-solid fa-arrow-left"></i> Retour
+            </button>
+            <button type="button" class="btn-outline" style="margin-left:auto; color:#dc3545; border-color:#dc3545;" onclick="cancelForm()">
+              <i class="fa-solid fa-times"></i> Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let analyses = [];
+    let medications = [];
+    let factures = [];
+
+    // Ajouter une analyse
+    function addAnalysis() {
+      const analysisInput = document.getElementById('newAnalysis');
+      const analysis = analysisInput.value.trim();
+      
+      if (analysis) {
+        analyses.push(analysis);
+        updateAnalysesList();
+        analysisInput.value = '';
+      }
+    }
+
+    // Mettre à jour la liste des analyses
+    function updateAnalysesList() {
+      const container = document.getElementById('analysesList');
+      container.innerHTML = '';
+
+      analyses.forEach((analysis, index) => {
+        const item = document.createElement('div');
+        item.className = 'analysis-item';
+        item.innerHTML = `
+          <div class="item-header">
+            <span>${analysis}</span>
+            <button type="button" class="remove-btn" onclick="removeAnalysis(${index})">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Supprimer une analyse
+    function removeAnalysis(index) {
+      analyses.splice(index, 1);
+      updateAnalysesList();
+    }
+
+    // Ajouter un médicament
+    function addMedication() {
+      const medicament = document.getElementById('medicament').value.trim();
+      const dosage = document.getElementById('dosage').value.trim();
+      const posologie = document.getElementById('posologie').value.trim();
+      const duree = document.getElementById('duree').value.trim();
+
+      if (medicament && dosage && posologie && duree) {
+        medications.push({
+          medicament,
+          dosage,
+          posologie,
+          duree
+        });
+
+        updateMedicationsList();
+        clearMedicationForm();
+      } else {
+        alert('Veuillez remplir tous les champs du médicament');
+      }
+    }
+
+    // Mettre à jour la liste des médicaments
+    function updateMedicationsList() {
+      const container = document.getElementById('medicationsList');
+      container.innerHTML = '';
+
+      medications.forEach((med, index) => {
+        const item = document.createElement('div');
+        item.className = 'medication-item';
+        item.innerHTML = `
+          <div class="item-header">
+            <strong>${med.medicament} - ${med.dosage}</strong>
+            <button type="button" class="remove-btn" onclick="removeMedication(${index})">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div>Posologie: ${med.posologie}</div>
+          <div>Durée: ${med.duree}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Supprimer un médicament
+    function removeMedication(index) {
+      medications.splice(index, 1);
+      updateMedicationsList();
+    }
+
+    // Vider le formulaire médicament
+    function clearMedicationForm() {
+      document.getElementById('medicament').value = '';
+      document.getElementById('dosage').value = '';
+      document.getElementById('posologie').value = '';
+      document.getElementById('duree').value = '';
+    }
+
+    // Ajouter une facture
+    function addFacture() {
+      const montant = document.getElementById('montant').value;
+      const statutPaiement = document.getElementById('statutPaiement').value;
+
+      if (montant && statutPaiement) {
+        factures.push({
+          montant: parseFloat(montant),
+          statut: statutPaiement,
+          date: new Date().toISOString().split('T')[0]
+        });
+
+        updateFacturesList();
+        clearFactureForm();
+      } else {
+        alert('Veuillez remplir tous les champs de la facture');
+      }
+    }
+
+    // Mettre à jour la liste des factures
+    function updateFacturesList() {
+      const container = document.getElementById('facturesList');
+      container.innerHTML = '';
+
+      factures.forEach((facture, index) => {
+        const item = document.createElement('div');
+        item.className = 'facture-item';
+        item.innerHTML = `
+          <div class="item-header">
+            <strong>${facture.montant} FCFA - ${facture.statut}</strong>
+            <button type="button" class="remove-btn" onclick="removeFacture(${index})">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div>Date: ${facture.date}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Supprimer une facture
+    function removeFacture(index) {
+      factures.splice(index, 1);
+      updateFacturesList();
+    }
+
+    // Vider le formulaire facture
+    function clearFactureForm() {
+      document.getElementById('montant').value = '';
+      document.getElementById('statutPaiement').value = 'En attente';
+    }
+
+    // Soumettre le formulaire
+    document.getElementById('consultationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = {
+        ticket: document.getElementById('ticket').value,
+        nom: document.getElementById('nom').value,
+        prenom: document.getElementById('prenom').value,
+        image: document.getElementById('image').value || 'https://i.pravatar.cc/40',
+        date: document.getElementById('date').value,
+        heure: document.getElementById('heure').value,
+        motif: document.getElementById('motif').value,
+        statut: document.getElementById('statut').value,
+        symptomes: document.getElementById('symptomes').value,
+        analyses: analyses,
+        examens: [document.getElementById('examens').value],
+        medications: medications,
+        factures: factures
+      };
+
+      try {
+        const response = await fetch('/api/consultations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert('Consultation enregistrée avec succès!');
+          window.location.href = `consultation_detail.html?id=${result.consultation._id}`;
+        } else {
+          alert('Erreur lors de l\'enregistrement de la consultation');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur de connexion au serveur');
+      }
+    });
+
+    // Annuler et retourner
+    function cancelForm() {
+      if (confirm('Voulez-vous vraiment annuler cette consultation ? Les données saisies seront perdues.')) {
+        window.location.href = 'medecin_dashboard.html';
+      }
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    // Déconnexion
+    document.getElementById('logout').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    });
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = JSON.parse(localStorage.getItem('currentUser')) || { username: 'Médecin' };
+      document.getElementById('usernameDisplay').textContent = user.username;
+
+      // Générer un numéro de ticket automatique
+      const ticketNumber = 'TKT' + Date.now().toString().slice(-6);
+      document.getElementById('ticket').value = ticketNumber;
+
+      // Date du jour par défaut
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('date').value = today;
+
+      // Heure actuelle par défaut
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('heure').value = `${hours}:${minutes}`;
+    });
+  </script>
+</body>
+</html>
